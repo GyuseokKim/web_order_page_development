@@ -9,6 +9,11 @@
       --bg:#0b1120; --card:#0f172a; --border:#1f2937;
       --text:#e5e7eb; --sub:#9ca3af; --accent:#22c55e; --danger:#ef4444;
       --chip:#111827;
+
+      /* ✅ 송금 페이지(모달) 밝게 */
+      --pay-overlay: rgba(0,0,0,0.35);
+      --pay-sheet: #18223a;          /* 메인 카드보다 밝은 톤 */
+      --pay-sheet-2: rgba(255,255,255,0.06);
     }
     *{box-sizing:border-box;}
     body{
@@ -156,10 +161,10 @@
     .error{margin-top:10px; color:var(--danger); font-size:13px; display:none;}
     .mono{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;}
 
-    /* 송금 모달 */
+    /* ✅ 송금 모달(밝게) */
     .overlay{
       position:fixed; inset:0;
-      background:rgba(0,0,0,0.55);
+      background:var(--pay-overlay);
       display:none;
       align-items:flex-end;
       justify-content:center;
@@ -168,8 +173,8 @@
     }
     .sheet{
       width:min(560px, 100%);
-      background:var(--card);
-      border:1px solid var(--border);
+      background:var(--pay-sheet);
+      border:1px solid rgba(255,255,255,0.10);
       border-radius:18px;
       box-shadow:0 20px 60px rgba(0,0,0,.45);
       overflow:hidden;
@@ -179,18 +184,20 @@
       display:flex;
       justify-content:space-between;
       align-items:center;
-      border-bottom:1px solid var(--border);
+      border-bottom:1px solid rgba(255,255,255,0.12);
+      background:rgba(255,255,255,0.03);
     }
     .sheetTitle{font-weight:900;}
+    /* ✅ X 버튼 대신 "되돌아가기" */
     .sheetClose{
-      background:transparent;
+      background:rgba(255,255,255,0.08);
       color:var(--text);
-      border:1px solid var(--border);
-      width:34px; height:34px;
-      border-radius:999px;
+      border:1px solid rgba(255,255,255,0.12);
+      padding:10px 12px;
+      border-radius:12px;
       cursor:pointer;
-      font-size:18px;
-      line-height:1;
+      font-size:13px;
+      font-weight:900;
     }
     .sheetBody{padding:14px;}
     .pill{
@@ -199,7 +206,7 @@
       flex-wrap:wrap;
       margin-bottom:10px;
     }
-    .pill .chip{background:rgba(255,255,255,0.05);}
+    .pill .chip{background:var(--pay-sheet-2); border-color:rgba(255,255,255,0.12);}
     .payGrid{
       display:grid;
       grid-template-columns:1fr;
@@ -207,10 +214,10 @@
       margin-top:10px;
     }
     .payItem{
-      border:1px solid var(--border);
+      border:1px solid rgba(255,255,255,0.12);
       border-radius:14px;
       padding:12px;
-      background:rgba(255,255,255,0.03);
+      background:rgba(255,255,255,0.05);
     }
     .payItemTop{
       display:flex;
@@ -220,7 +227,7 @@
       margin-bottom:8px;
     }
     .payName{font-weight:900;}
-    .payHint{color:var(--sub); font-size:12px; line-height:1.4;}
+    .payHint{color:rgba(229,231,235,0.85); font-size:12px; line-height:1.4;}
     .payBtns{
       display:flex;
       gap:8px;
@@ -230,8 +237,8 @@
     .smallBtn{
       padding:10px 12px;
       border-radius:12px;
-      border:1px solid var(--border);
-      background:rgba(255,255,255,0.06);
+      border:1px solid rgba(255,255,255,0.12);
+      background:rgba(255,255,255,0.08);
       color:var(--text);
       cursor:pointer;
       font-weight:800;
@@ -247,7 +254,7 @@
       left:50%;
       transform:translateX(-50%);
       bottom:20px;
-      background:rgba(0,0,0,0.8);
+      background:rgba(0,0,0,0.85);
       color:#fff;
       padding:10px 12px;
       border-radius:999px;
@@ -343,7 +350,7 @@
           <div class="sumRow" style="align-items:flex-start;">
             <div class="sumLabel">입금 계좌 안내</div>
             <div class="sumValue mono" style="text-align:right;">
-              <div id="accountView">641-099142-02-001 우리은행(Kbank) 김규석</div>
+              <div id="accountView">100-154-388868 케이뱅크(Kbank) 이민혁</div>
               <div style="margin-top:6px; font-weight:600; color:var(--sub); font-size:12px;">
                 ※ 입금자명은 “입금자”란과 동일하게 입력해 주세요.
               </div>
@@ -354,7 +361,7 @@
         <div class="error" id="errorBox"></div>
 
         <button class="btn secondary" id="payBtn">송금하기 (월렛/토스/카카오뱅크/카카오페이)</button>
-        <button class="btn" id="sendBtn">문자(01046558794)로 주문하기</button>
+        <button class="btn" id="sendBtn">문자(01083325000)로 주문하기</button>
       </div>
     </div>
   </div>
@@ -364,10 +371,10 @@
     <div class="sheet" role="dialog" aria-modal="true" aria-label="송금하기">
       <div class="sheetHeader">
         <div class="sheetTitle">송금하기</div>
-        <button class="sheetClose" id="payClose" type="button">×</button>
+        <!-- ✅ 'X' 대신 '되돌아가기' -->
+        <button class="sheetClose" id="payClose" type="button">되돌아가기</button>
       </div>
       <div class="sheetBody">
-        <!-- ? 요청한 짧은 안내 문구 -->
         <div class="payHint" style="margin-bottom:10px;">
           송금 후 돌아와 ‘문자 주문하기’ 눌러주세요
         </div>
@@ -401,7 +408,6 @@
               <div class="payHint">계좌+금액 복사 후 카카오페이에서 붙여넣기</div>
             </div>
             <div class="payBtns">
-              <!-- ? 버튼 문구 변경 -->
               <button class="smallBtn primary" id="openKakaoPayHome" type="button">복사 후 카카오페이에서 송금</button>
             </div>
           </div>
@@ -437,10 +443,10 @@
   <div class="toast" id="toast"></div>
 
   <script>
-    const ORDER_TO = "01046558794";
-    const ACCOUNT_TEXT = "641-099142-02-001 우리은행(Kbank) 김규석";
-    const BANK_NAME_FOR_TOSS = "우리은행";
-    const ACCOUNT_NO_FOR_TOSS = "641-099142-02-001";
+    const ORDER_TO = "01083325000";
+    const ACCOUNT_TEXT = "100-154-388868 케이뱅크(Kbank) 이민혁";
+    const BANK_NAME_FOR_TOSS = "케이뱅크";
+    const ACCOUNT_NO_FOR_TOSS = "100-154-388868";
 
     function calcShippingByQty(totalQty) {
       if (totalQty <= 0) return 0;
@@ -534,7 +540,7 @@
             <div class="price">${formatKRW(it.price)}</div>
             <div class="qty">
               <div class="qtyBox">
-                <button class="qtyBtn minus" type="button" aria-label="감소">?</button>
+                <button class="qtyBtn minus" type="button" aria-label="감소">-</button>
                 <input class="qtyInput" value="0" inputmode="numeric" aria-label="수량" />
                 <button class="qtyBtn plus" type="button" aria-label="증가">+</button>
               </div>
@@ -671,10 +677,16 @@
       window.location.href = smsUrl;
     });
 
-    // 송금 모달 열기/닫기
+    // ✅ (1) 송금하기: 총액 0이면 진입 막고 안내 표시
     function openPaySheet() {
       hideError();
       const { grand } = getTotals();
+
+      if (grand <= 0) {
+        showToast("송금할 금액이 없습니다.");
+        return;
+      }
+
       $("payAccount").textContent = ACCOUNT_TEXT;
       $("payAmount").textContent = formatKRW(grand);
       $("payOverlay").style.display = "flex";
@@ -716,7 +728,7 @@
     // 토스(가능하면 송금 화면으로) - 환경에 따라 실패할 수 있음
     $("openToss").addEventListener("click", () => {
       const { grand } = getTotals();
-      if (grand <= 0) return showToast("송금할 금액이 없습니다 (총액 0원)");
+      if (grand <= 0) return showToast("송금할 금액이 없습니다.");
       const url =
         `supertoss://send?amount=${encodeURIComponent(String(grand))}` +
         `&bank=${encodeURIComponent(BANK_NAME_FOR_TOSS)}` +
@@ -729,9 +741,11 @@
       tryOpen("supertoss://toss/pay", "https://toss.im");
     });
 
-    // ? 카카오페이: "복사 먼저" + "새창으로 열기 시도" (돌아오기 문제 최소화)
+    // 카카오페이: 복사 먼저 + 새창 시도
     $("openKakaoPayHome").addEventListener("click", async () => {
       const { grand } = getTotals();
+      if (grand <= 0) return showToast("송금할 금액이 없습니다.");
+
       const copyPayload = `계좌: ${ACCOUNT_TEXT}\n금액: ${formatKRW(grand)}`;
       await copyText(copyPayload);
       showToast("계좌+금액 복사됨 → 카카오페이에서 붙여넣기");
