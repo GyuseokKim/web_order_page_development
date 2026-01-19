@@ -353,9 +353,7 @@
 
         <div class="error" id="errorBox"></div>
 
-        <!-- ? 송금하기 버튼: 문자 주문하기 위 -->
         <button class="btn secondary" id="payBtn">송금하기 (월렛/토스/카카오뱅크/카카오페이)</button>
-
         <button class="btn" id="sendBtn">문자(01046558794)로 주문하기</button>
       </div>
     </div>
@@ -369,14 +367,14 @@
         <button class="sheetClose" id="payClose" type="button">×</button>
       </div>
       <div class="sheetBody">
+        <!-- ? 요청한 짧은 안내 문구 -->
+        <div class="payHint" style="margin-bottom:10px;">
+          송금 후 돌아와 ‘문자 주문하기’ 눌러주세요
+        </div>
+
         <div class="pill">
           <span class="chip">입금계좌: <b id="payAccount">-</b></span>
           <span class="chip">송금금액(총액): <b id="payAmount">0원</b></span>
-        </div>
-        <div class="payHint">
-          ? 토스는 “송금 화면(계좌/금액)” 딥링크 시도를 합니다. :contentReference[oaicite:5]{index=5}<br/>
-          ? 카카오페이는 홈으로 이동 후 “송금”에서 붙여넣기 방식이 안정적입니다. :contentReference[oaicite:6]{index=6}<br/>
-          ? 카카오뱅크/월렛은 웹에서 송금 화면을 바로 여는 표준 링크가 제한적이라 “복사 → 앱에서 붙여넣기”를 권장합니다. :contentReference[oaicite:7]{index=7}
         </div>
 
         <div class="payBtns" style="margin-top:12px;">
@@ -389,7 +387,7 @@
           <div class="payItem">
             <div class="payItemTop">
               <div class="payName">토스</div>
-              <div class="payHint">가능하면 송금 화면으로 바로 이동</div>
+              <div class="payHint">가능하면 송금 화면으로 바로 이동(환경에 따라 실패 가능)</div>
             </div>
             <div class="payBtns">
               <button class="smallBtn primary" id="openToss" type="button">토스로 송금</button>
@@ -400,10 +398,11 @@
           <div class="payItem">
             <div class="payItemTop">
               <div class="payName">카카오페이</div>
-              <div class="payHint">카카오페이 홈 → 송금에서 붙여넣기</div>
+              <div class="payHint">계좌+금액 복사 후 카카오페이에서 붙여넣기</div>
             </div>
             <div class="payBtns">
-              <button class="smallBtn primary" id="openKakaoPayHome" type="button">카카오페이 열기</button>
+              <!-- ? 버튼 문구 변경 -->
+              <button class="smallBtn primary" id="openKakaoPayHome" type="button">복사 후 카카오페이에서 송금</button>
             </div>
           </div>
 
@@ -420,7 +419,7 @@
           <div class="payItem">
             <div class="payItemTop">
               <div class="payName">월렛(Apple/Samsung)</div>
-              <div class="payHint">웹 링크로 “송금/요청” 자동 이동은 제한적</div>
+              <div class="payHint">웹 링크로 송금 화면 자동 이동은 제한적</div>
             </div>
             <div class="payBtns">
               <button class="smallBtn" id="openWalletGuide" type="button">방법 보기</button>
@@ -488,6 +487,30 @@
       box.textContent = "";
     }
 
+    async function copyText(txt) {
+      try {
+        await navigator.clipboard.writeText(txt);
+        showToast("복사되었습니다");
+      } catch {
+        const ta = document.createElement("textarea");
+        ta.value = txt;
+        ta.style.position = "fixed";
+        ta.style.left = "-9999px";
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
+        showToast("복사되었습니다");
+      }
+    }
+
+    function sanitizeQty(v) {
+      const cleaned = (v || "").replace(/[^\d]/g, "");
+      if (cleaned === "") return 0;
+      const n = parseInt(cleaned, 10);
+      return Number.isFinite(n) ? Math.max(0, n) : 0;
+    }
+
     function renderMenu() {
       const box = $("menuBox");
       const head = box.querySelector(".menu-head");
@@ -518,19 +541,11 @@
             </div>
             <div class="subtot"><span class="subtotView">0원</span></div>
           `;
-
           box.appendChild(row);
         });
       });
 
       updateTotals();
-    }
-
-    function sanitizeQty(v) {
-      const cleaned = (v || "").replace(/[^\d]/g, "");
-      if (cleaned === "") return 0;
-      const n = parseInt(cleaned, 10);
-      return Number.isFinite(n) ? Math.max(0, n) : 0;
     }
 
     function getTotals() {
@@ -567,7 +582,7 @@
 
       $("accountView").textContent = ACCOUNT_TEXT;
 
-      // 송금 모달 표시 값도 함께 최신화
+      // 모달 표시 값 최신화
       $("payAccount").textContent = ACCOUNT_TEXT;
       $("payAmount").textContent = formatKRW(grand);
     }
@@ -676,25 +691,7 @@
       if (e.target.id === "payOverlay") closePaySheet();
     });
 
-    // 복사 기능
-    async function copyText(txt) {
-      try {
-        await navigator.clipboard.writeText(txt);
-        showToast("복사되었습니다");
-      } catch {
-        // fallback
-        const ta = document.createElement("textarea");
-        ta.value = txt;
-        ta.style.position = "fixed";
-        ta.style.left = "-9999px";
-        document.body.appendChild(ta);
-        ta.select();
-        document.execCommand("copy");
-        document.body.removeChild(ta);
-        showToast("복사되었습니다");
-      }
-    }
-
+    // 복사 버튼
     $("copyAccountBtn").addEventListener("click", () => copyText(ACCOUNT_TEXT));
     $("copyAmountBtn").addEventListener("click", () => {
       const { grand } = getTotals();
@@ -705,9 +702,8 @@
       copyText(`계좌: ${ACCOUNT_TEXT}\n금액: ${formatKRW(grand)}`);
     });
 
-    // 앱 열기(딥링크)
+    // 딥링크 시도
     function tryOpen(url, fallbackUrl) {
-      // 일부 브라우저/OS에서 실패할 수 있어 fallback 제공
       const start = Date.now();
       window.location.href = url;
       setTimeout(() => {
@@ -717,7 +713,7 @@
       }, 900);
     }
 
-    // 토스 송금: supertoss://send?amount=금액&bank=은행명&accountNo=계좌번호&origin=qr :contentReference[oaicite:8]{index=8}
+    // 토스(가능하면 송금 화면으로) - 환경에 따라 실패할 수 있음
     $("openToss").addEventListener("click", () => {
       const { grand } = getTotals();
       if (grand <= 0) return showToast("송금할 금액이 없습니다 (총액 0원)");
@@ -726,21 +722,32 @@
         `&bank=${encodeURIComponent(BANK_NAME_FOR_TOSS)}` +
         `&accountNo=${encodeURIComponent(ACCOUNT_NO_FOR_TOSS)}` +
         `&origin=qr`;
-      tryOpen(url, "https://toss.im"); // fallback은 토스 웹
+      tryOpen(url, "https://toss.im");
     });
 
-    // 토스 대체: 토스 앱의 특정 페이지 예시(super t oss scheme) :contentReference[oaicite:9]{index=9}
     $("openTossHome").addEventListener("click", () => {
-      tryOpen("supertoss://toss/pay", "https://toss.im"); // 결제/관련 화면 예시
+      tryOpen("supertoss://toss/pay", "https://toss.im");
     });
 
-    // 카카오페이 홈 열기: kakaotalk://kakaopay/home :contentReference[oaicite:10]{index=10}
-    $("openKakaoPayHome").addEventListener("click", () => {
-      tryOpen("kakaotalk://kakaopay/home", "https://www.kakaocorp.com/page/service/service/KakaoPay?lang=ko");
+    // ? 카카오페이: "복사 먼저" + "새창으로 열기 시도" (돌아오기 문제 최소화)
+    $("openKakaoPayHome").addEventListener("click", async () => {
+      const { grand } = getTotals();
+      const copyPayload = `계좌: ${ACCOUNT_TEXT}\n금액: ${formatKRW(grand)}`;
+      await copyText(copyPayload);
+      showToast("계좌+금액 복사됨 → 카카오페이에서 붙여넣기");
+
+      const url = "kakaotalk://kakaopay/home";
+      const w = window.open(url, "_blank");
+
+      setTimeout(() => {
+        if (!w) {
+          showToast("새 창 열기 실패: 카카오페이 앱을 직접 실행해 붙여넣기 해주세요");
+        }
+      }, 400);
     });
 
     $("openKakaoBankGuide").addEventListener("click", () => {
-      showToast("계좌/금액 복사 → 카카오뱅크 앱에서 송금 화면에 붙여넣기");
+      showToast("계좌/금액 복사 → 카카오뱅크 앱 송금 화면에 붙여넣기");
     });
 
     $("openWalletGuide").addEventListener("click", () => {
